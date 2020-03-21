@@ -1,20 +1,21 @@
 #include "camera.h"
 #include "float.h"
 #include "hittable_list.h"
+#include "materials/lambertian.h"
+#include "materials/metal.h"
 #include "random.h"
 #include "sphere.h"
 
 #include <fstream>
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 
-vec3 color(const ray& r, hittable* world);
+vec3 color(const ray& r, hittable* world, int depth);
 float hit_sphere(const vec3& center, float radius, const ray& r);
-vec3 random_in_unit_sphere();
 
 int main() {
-  int nx = 600;
-  int ny = 300;
+  int nx = 700;
+  int ny = 350;
   int ns = 100;
 
   auto out_file_path = getenv("OUT_FILE_PATH");
@@ -31,10 +32,16 @@ int main() {
   vec3 vertical(0.0, 2.0, 0.0);
   vec3 origin(0.0, 0.0, 0.0);
 
-  hittable* list[2];
-  list[0] = new sphere(vec3(0, 0, -1), 0.5);
-  list[1] = new sphere(vec3(0, -100.5, -1), 100);
-  hittable* world = new hittable_list(list, 2);
+  hittable* list[4];
+  list[0] =
+      new sphere(vec3(0, 0, -1), 0.5, new lambertian(vec3(0.8, 0.3, 0.3)));
+  list[1] =
+      new sphere(vec3(0, -100.5, -1), 100, new lambertian(vec3(0.8, 0.8, 0.0)));
+  list[2] =
+      new sphere(vec3(1, 0, -1), 0.5, new metal(vec3(0.8, 0.6, 0.2), 0.1));
+  list[3] =
+      new sphere(vec3(-1, 0, -1), 0.5, new metal(vec3(0.8, 0.8, 0.8), 1.0));
+  hittable* world = new hittable_list(list, 4);
   camera cam;
 
   const int total_iterations = nx * ny;
@@ -47,7 +54,7 @@ int main() {
         float u = float(i + random_double()) / float(nx);
         float v = float(j + random_double()) / float(ny);
         ray r = cam.get_ray(u, v);
-        col += color(r, world);
+        col += color(r, world, 0);
       }
       col /= float(ns);
       col = vec3(sqrt(col[0]), sqrt(col[1]), sqrt(col[2]));
@@ -72,11 +79,16 @@ int main() {
   return 0;
 }
 
-vec3 color(const ray& r, hittable* world) {
+vec3 color(const ray& r, hittable* world, int depth) {
   hit_record rec;
   if (world->hit(r, 0.001, MAXFLOAT, rec)) {
-    vec3 target = rec.p + rec.normal + random_in_unit_sphere();
-    return 0.5 * color(ray(rec.p, target - rec.p), world);
+    ray scattered;
+    vec3 attenuation;
+    if (depth < 50 && rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
+      return attenuation * color(scattered, world, depth + 1);
+    } else {
+      return vec3(0, 0, 0);
+    }
   } else {
     vec3 unit_direction = unit_vector(r.direction());
     float t = 0.5 * (unit_direction.y() + 1.0);
@@ -96,13 +108,4 @@ float hit_sphere(const vec3& center, float radius, const ray& r) {
   } else {
     return (-b - sqrt(discriminant)) / (2.0 * a);
   }
-}
-
-vec3 random_in_unit_sphere() {
-  vec3 p;
-  do {
-    p = 2.0 * vec3(random_double(), random_double(), random_double()) -
-        vec3(1, 1, 1);
-  } while (p.squared_length() >= 1.0);
-  return p;
 }
