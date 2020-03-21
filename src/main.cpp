@@ -1,5 +1,7 @@
+#include "camera.h"
 #include "float.h"
 #include "hittable_list.h"
+#include "random.h"
 #include "sphere.h"
 
 #include <fstream>
@@ -11,6 +13,7 @@ float hit_sphere(const vec3& center, float radius, const ray& r);
 int main() {
   int nx = 200;
   int ny = 100;
+  int ns = 100;
 
   auto out_file_path = getenv("OUT_FILE_PATH");
   std::cout << "Opening " << out_file_path << "\n";
@@ -30,15 +33,18 @@ int main() {
   list[0] = new sphere(vec3(0, 0, -1), 0.5);
   list[1] = new sphere(vec3(0, -100.5, -1), 100);
   hittable* world = new hittable_list(list, 2);
+  camera cam;
 
   for (int j = ny - 1; j >= 0; j--) {
     for (int i = 0; i < nx; i++) {
-      float u = float(i) / float(nx);
-      float v = float(j) / float(ny);
-      ray r(origin, lower_left_corner + u * horizontal + v * vertical);
-
-      vec3 p = r.point_at_parameter(2.0);
-      vec3 col = color(r, world);
+      vec3 col(0, 0, 0);
+      for (int s = 0; s < ns; s++) {
+        float u = float(i + random_double()) / float(nx);
+        float v = float(j + random_double()) / float(ny);
+        ray r = cam.get_ray(u, v);
+        col += color(r, world);
+      }
+      col /= float(ns);
 
       int ir = int(255.99 * col.r());
       int ig = int(255.99 * col.g());

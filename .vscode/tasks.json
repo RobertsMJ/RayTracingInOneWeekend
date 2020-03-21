@@ -3,20 +3,9 @@
     "tasks": [
         {
             "type": "shell",
-            "label": "g++ build active file",
-            "command": "/usr/bin/g++",
-            "args": [
-                "-g",
-                "${workspaceFolder}/src/main.cpp",
-                "-o",
-                "${workspaceFolder}/out/main"
-            ],
-            "options": {
-                "cwd": "/usr/bin"
-            },
-            "problemMatcher": [
-                "$gcc"
-            ],
+            "label": "g++ build main",
+            "command": "task",
+            "args": [ "build" ],
             "group": {
                 "kind": "build",
                 "isDefault": true
