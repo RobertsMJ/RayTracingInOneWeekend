@@ -3,13 +3,17 @@
 version: "2"
 
 env:
+  ENTRY_POINT: src/main.cpp
+  OUT_BUILD_ARTIFACT: out/main
   OUT_FILE_PATH: out/image.ppm
 
 tasks:
   build:
     cmds:
-      - g++ -g src/main.cpp -o out/main
+      - rm -f $OUT_BUILD_ARTIFACT
+      - g++ -g $ENTRY_POINT -o $OUT_BUILD_ARTIFACT
   run:
     cmds:
+      - rm -f $OUT_FILE_PATH
       - out/main
       - xdg-open $OUT_FILE_PATH

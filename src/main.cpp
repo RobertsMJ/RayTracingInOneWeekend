@@ -49,10 +49,6 @@ int main() {
   }
 
   out_file.close();
-  delete world;
-  delete list[0];
-  delete list[1];
-  delete *list;
 
   return 0;
 }
@@ -63,9 +59,6 @@ vec3 color(const ray& r, hittable* world) {
     return 0.5 *
            vec3(rec.normal.x() + 1, rec.normal.y() + 1, rec.normal.z() + 1);
   } else {
-    // lerp WRT the y-axis
-    // t=1.0 => blue
-    // t=0.0 => white
     vec3 unit_direction = unit_vector(r.direction());
     float t = 0.5 * (unit_direction.y() + 1.0);
     return (1.0 - t) * vec3(1.0, 1.0, 1.0) + t * vec3(0.5, 0.7, 1.0);
@@ -79,10 +72,9 @@ float hit_sphere(const vec3& center, float radius, const ray& r) {
   float b = 2.0 * dot(oc, r.direction());
   float c = dot(oc, oc) - radius * radius;
   float discriminant = b * b - 4 * a * c;
-
   if (discriminant < 0) {
-    return -1;
+    return -1.0;
   } else {
-    return (-b - sqrt(discriminant)) / (2 * a);
+    return (-b - sqrt(discriminant)) / (2.0 * a);
   }
 }
