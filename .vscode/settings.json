@@ -1,0 +1,7 @@
+{
+    "C_Cpp.clang_format_fallbackStyle": "Google",
+    "files.associations": {
+        "cmath": "cpp",
+        "iosfwd": "cpp"
+    }
+}
