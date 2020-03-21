@@ -1,9 +1,9 @@
 # https://taskfile.dev
 
-version: '2'
+version: "2"
 
-vars:
-  GREETING: Hello, World!
+env:
+  OUT_FILE_PATH: out/image.ppm
 
 tasks:
   build:
@@ -11,5 +11,5 @@ tasks:
       - g++ src/main.cpp -o out/program
   run:
     cmds:
-      - out/program > out/image.ppm
+      - out/program
       - xdg-open out/image.ppm
