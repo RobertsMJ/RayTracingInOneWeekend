@@ -6,13 +6,15 @@
 
 #include <fstream>
 #include <iostream>
+#include <iomanip>
 
 vec3 color(const ray& r, hittable* world);
 float hit_sphere(const vec3& center, float radius, const ray& r);
+vec3 random_in_unit_sphere();
 
 int main() {
-  int nx = 200;
-  int ny = 100;
+  int nx = 600;
+  int ny = 300;
   int ns = 100;
 
   auto out_file_path = getenv("OUT_FILE_PATH");
@@ -35,6 +37,9 @@ int main() {
   hittable* world = new hittable_list(list, 2);
   camera cam;
 
+  const int total_iterations = nx * ny;
+  int current_iterations = 0;
+
   for (int j = ny - 1; j >= 0; j--) {
     for (int i = 0; i < nx; i++) {
       vec3 col(0, 0, 0);
@@ -45,14 +50,22 @@ int main() {
         col += color(r, world);
       }
       col /= float(ns);
+      col = vec3(sqrt(col[0]), sqrt(col[1]), sqrt(col[2]));
 
       int ir = int(255.99 * col.r());
       int ig = int(255.99 * col.g());
       int ib = int(255.99 * col.b());
 
       out_file << ir << " " << ig << " " << ib << "\n";
+
+      // Progress indicator, this takes a while...
+      std::cout << std::setw(3)
+                << int(current_iterations++ / float(total_iterations) * 100)
+                << "%"
+                << "\r";
     }
   }
+  std::cout << "\n";
 
   out_file.close();
 
@@ -61,9 +74,9 @@ int main() {
 
 vec3 color(const ray& r, hittable* world) {
   hit_record rec;
-  if (world->hit(r, 0.0, MAXFLOAT, rec)) {
-    return 0.5 *
-           vec3(rec.normal.x() + 1, rec.normal.y() + 1, rec.normal.z() + 1);
+  if (world->hit(r, 0.001, MAXFLOAT, rec)) {
+    vec3 target = rec.p + rec.normal + random_in_unit_sphere();
+    return 0.5 * color(ray(rec.p, target - rec.p), world);
   } else {
     vec3 unit_direction = unit_vector(r.direction());
     float t = 0.5 * (unit_direction.y() + 1.0);
@@ -83,4 +96,13 @@ float hit_sphere(const vec3& center, float radius, const ray& r) {
   } else {
     return (-b - sqrt(discriminant)) / (2.0 * a);
   }
+}
+
+vec3 random_in_unit_sphere() {
+  vec3 p;
+  do {
+    p = 2.0 * vec3(random_double(), random_double(), random_double()) -
+        vec3(1, 1, 1);
+  } while (p.squared_length() >= 1.0);
+  return p;
 }
