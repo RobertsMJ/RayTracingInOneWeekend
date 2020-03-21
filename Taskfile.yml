@@ -8,8 +8,8 @@ env:
 tasks:
   build:
     cmds:
-      - g++ src/main.cpp -o out/program
+      - g++ -g src/main.cpp -o out/main
   run:
     cmds:
-      - out/program
-      - xdg-open out/image.ppm
+      - out/main
+      - xdg-open $OUT_FILE_PATH
