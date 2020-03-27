@@ -12,6 +12,14 @@
       "environment": [],
       "externalConsole": false,
       "MIMode": "gdb",
+      "linux": {
+        "environment": [
+          {
+            "name": "OUT_FILE_PATH",
+            "value": "out/image.ppm"
+          }
+        ]
+      },
       "setupCommands": [
         {
           "description": "Enable pretty-printing for gdb",

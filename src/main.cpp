@@ -3,6 +3,7 @@
 
 #include "camera.h"
 #include "hittable_list.h"
+#include "materials/dielectric.h"
 #include "materials/lambertian.h"
 #include "materials/metal.h"
 #include "sphere.h"
@@ -15,10 +16,12 @@ vec3 ray_color(const ray& r, const hittable& world, int depth);
 double hit_sphere(const vec3& center, double radius, const ray& r);
 
 int main() {
-  const int image_width = 200;
-  const int image_height = 100;
+  const int image_width = 640;
+  const int image_height = 480;
+  const auto aspect_ratio = double(image_width) / image_height;
   const int samples_per_pixel = 100;
   const int max_depth = 50;
+  const vec3 vup(0, 1, 0);
 
   auto out_file_path = getenv("OUT_FILE_PATH");
   std::cout << "Opening " << out_file_path << "\n";
@@ -31,15 +34,17 @@ int main() {
 
   hittable_list world;
   world.add(make_shared<sphere>(vec3(0, 0, -1), 0.5,
-                                make_shared<lambertian>(vec3(0.7, 0.3, 0.3))));
+                                make_shared<lambertian>(vec3(0.1, 0.2, 0.5))));
   world.add(make_shared<sphere>(vec3(0, -100.5, -1), 100,
                                 make_shared<lambertian>(vec3(0.8, 0.8, 0.0))));
   world.add(make_shared<sphere>(vec3(1, 0, -1), 0.5,
                                 make_shared<metal>(vec3(0.8, 0.6, 0.2), 0.3)));
-  world.add(make_shared<sphere>(vec3(-1, 0, -1), 0.5,
-                                make_shared<metal>(vec3(0.8, 0.8, 0.8), 1.0)));
+  world.add(
+      make_shared<sphere>(vec3(-1, 0, -1), 0.5, make_shared<dielectric>(1.5)));
+  world.add(make_shared<sphere>(vec3(-1, 0, -1), -0.45,
+                                make_shared<dielectric>(1.5)));
 
-  camera cam;
+  camera cam(vec3(-2, 2, 1), vec3(0, 0, -1), vup, 90, aspect_ratio);
 
   for (int j = image_height - 1; j >= 0; j--) {
     for (int i = 0; i < image_width; ++i) {
