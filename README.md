@@ -4,3 +4,5 @@ Following [RayTracingInOneWeekend](https://raytracing.github.io/books/RayTracing
 To build and run:  
 `task build`  
 `task run`
+
+![alt text](./images/random.png "Generated image")
